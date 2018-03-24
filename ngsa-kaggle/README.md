@@ -9,9 +9,9 @@ __Authors__: Adib Baziz, Reuben Dorent, Samuel Joutard, Joël Seytre<br>
 _Competition_: [Predict missing links in citation networks](https://www.kaggle.com/c/ngsa-2018)<br>
 Our report can be found [here](https://www.overleaf.com/14816913nhgjghdgrtfc).
 ## Index
-1. [Code structure](#Code Structure)
+1. [Code structure](#code)
 
-# <a name="init"></a>Code Structure
+# <a name="code"></a>Code Structure
 * **bin** <br>
 Contains documents that were provided from the start.
 * **data** <br>
