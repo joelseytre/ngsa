@@ -10,6 +10,7 @@ _Competition_: [Predict missing links in citation networks](https://www.kaggle.c
 Our report can be found [here](https://www.overleaf.com/14816913nhgjghdgrtfc).
 ## Index
 1. [Code structure](#code)
+2. [Features](#features)
 
 # <a name="code"></a>Code Structure
 * **bin** <br>
@@ -36,3 +37,18 @@ This is where you can choose the setting for the run such as whether to compute 
     * `pip install -r requirements.txt`<br>
 *if needed (Windows...) there is the wheel for the igraph library for Python 2.7-x64*
 
+# <a name="features"></a>Features
+The features computed are:
+* The three **default features** provided with the baseline <br>
+    * **Title overlap**: number of overlapping words in titles
+    * **Year difference** between articles
+    * **Number of common authors**
+* The **TF-IDF** (Term Frequency - Inverse Document Frequency) between the source and target articles<br>:
+    * **TF-IDF distance between the articles' abstracts**
+    * **TF-IDF distance between the articles' author names** (probably very useless feature)
+    * **TF-IDF distance between the articles' titles**
+* The **number of times the target article is cited**
+* The **shortest path between the source and the target articles** (discounting an existing direct edge for the training set)
+    * in the **directed** graph
+    * in the **undirected** copy of the graph
+* The **jaccard similarity coefficients of the source and target articles**
