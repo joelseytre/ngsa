@@ -43,7 +43,7 @@ The features computed are:
     * **Title overlap**: number of overlapping words in titles
     * **Year difference** between articles
     * **Number of common authors**
-* The **TF-IDF** (Term Frequency - Inverse Document Frequency) between the source and target articles<br>:
+* The **TF-IDF** (Term Frequency - Inverse Document Frequency) between the source and target articles:
     * **TF-IDF distance between the articles' abstracts**
     * **TF-IDF distance between the articles' author names** (probably very useless feature)
     * **TF-IDF distance between the articles' titles**
