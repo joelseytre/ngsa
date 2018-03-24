@@ -104,3 +104,4 @@ ngsa-kaggle/out/*
 ngsa-kaggle/ngsak-venv/*
 
 *.xml
+*.iml

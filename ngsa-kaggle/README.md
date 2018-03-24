@@ -11,7 +11,7 @@ Our report can be found [here](https://www.overleaf.com/14816913nhgjghdgrtfc).
 ## Index
 1. [Code structure](#Code Structure)
 
-#Code Structure
+#<a name="init"></a>Code Structure
 * **bin** <br>
 Contains documents that were provided from the start.
 * **data** <br>
