@@ -99,3 +99,8 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+ngsa-kaggle/out/*
+ngsa-kaggle/ngsak-venv/*
+
+*.xml
