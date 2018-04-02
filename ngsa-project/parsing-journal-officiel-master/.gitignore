@@ -18,3 +18,5 @@ scrapping/spiders/__pycache__/*
 *.pyc
 *.pyc
 *.iml
+
+ngsa-pvenv/*

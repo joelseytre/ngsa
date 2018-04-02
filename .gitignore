@@ -103,5 +103,19 @@ ENV/
 ngsa-kaggle/out/*
 ngsa-kaggle/ngsak-venv/*
 
+ngsa-project/ngsa-pvenv/*
+
 *.xml
 *.iml
+*.h
+
+ngsa-project/parsing-journal-officiel-master/parsing_xml/data/*
+ngsa-project/parsing-journal-officiel-master/parsing_xml/logs/
+**/logs.txt
+
+ngsa-project/parsing-journal-officiel-master/scrapping/output/*
+ngsa-project/parsing-journal-officiel-master/scrapping/output_save/*
+ngsa-project/parsing-journal-officiel-master/scrapping/tests/*
+ngsa-project/parsing-journal-officiel-master/scrapping/test.py
+ngsa-project/parsing-journal-officiel-master/scrapping/logs/*
+ngsa-project/parsing-journal-officiel-master/scrapping/spiders/__pycache__/*
