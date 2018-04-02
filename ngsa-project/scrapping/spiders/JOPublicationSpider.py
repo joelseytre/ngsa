@@ -38,9 +38,11 @@ class JOPublicationSpider(scrapy.Spider):
             assert(boolean)
         except AssertionError:
             print(warningMessage)
+            # print('AssertionError: {0}'.format(warningMessage))
             if outputFileName:
                 outputFileName = outputFileName[2:]
                 with open(outputFileName, 'a+') as outfile:
+                    # print('Writting to {0}...'.format(outputFileName))
                     outfile.write('{0}|{1}\n'.format(str(datetime.now()), warningMessage))
 
     # PARSING THE PUBLICATION'S SUMMARY
@@ -152,14 +154,11 @@ class JOPublicationSpider(scrapy.Spider):
             for i, ul in enumerate(mainTag.xpath('./ul')):
                 self.recursiveUL([h3Titles[i]], ul)
 
-        date = '-'.join(response.url.split('/')[-3:])
-
         # Final data
         data = {
             'title': mainTitle,
             'url': response.url,
             'array': self.array,
-            'date': date,
         }
 
         # Testing that the retreived data is somewhat consistent with
@@ -177,12 +176,12 @@ class JOPublicationSpider(scrapy.Spider):
             os.makedirs(path)
 
         with open(os.path.join(path, filename), 'w+') as outfile:
-            json.dump(data, outfile, ensure_ascii=False)
+            json.dump(data, outfile)
 
         for followLink in data['array']:
             yield scrapy.Request(
                 'https://www.legifrance.gouv.fr' + followLink['href'],
-                callback=partial(self.parseArticle, followLink['text'], response.url, followLink['i'])
+                callback=partial(self.parseArticle, response.url, followLink['i'])
             )
 
 
@@ -191,51 +190,39 @@ class JOPublicationSpider(scrapy.Spider):
     # Inside an article, find the relevant pieces of text
     # and parse them correctly.
 
-    def enrichLinks(self, soup):
+
+    def enrichLinks(self, div):
         """
-        Input: SBeatifulSoup soup
+        Input: Scrapy <div> tag.
         Output: dict with information concerning the input tag.
         """
 
-        k = 0
-        for a in soup.findAll('a'):
-            href = a.get('href')
-            text = a.get_text()
+        links = div.xpath('.//a')
 
-            if (href and text != ' '):
-                hashValue = str(hash(str(k) + text))
-
-                cid = []
-                if href:
-                    cid = re.search('cidTexte\=(.*?)(?=\&)', href)
-                    cid = cid.groups() if cid else []
-
-                a.replaceWith('parsedLink#{}'.format(hashValue))
-
-                self.links.append({
-                    'text': text,
-                    'href': href,
-                    'cid': cid[0] if len(cid) > 0 else None,
-                    'hash': hashValue,
-                })
-                k += 1
-
-        return soup
+        for a in links:
+            text = a.xpath('./text()').extract_first()
+            href = a.xpath('./@href').extract_first()
+            self.links.append({
+                'text': text,
+                'href': href,
+            })
 
     def parseTables(self, soup):
         """
         Input: BeatifulSoup soup.
         Output:
             * soup with <table> tags replaced by their hash value
-            * an array of parsed <table> tags
+            * a dict mapping each <table> tag's hash value to the parsed version
+            of that table.
         """
 
-        parsedTables = []
+        parsedTables = {}
 
         for table in soup.findAll('table'):
             parsedTable = self.tableParser.toJson(table)
-            parsedTables.append(parsedTable)
-            table.replaceWith('parsedTable#{}'.format(str(parsedTable['hash'])))
+            h = hash(str(parsedTable))
+            # parsedTables[h] = parsedTable
+            table.replaceWith('parsedTable#' + str(h))
 
         return soup, parsedTables
 
@@ -249,10 +236,9 @@ class JOPublicationSpider(scrapy.Spider):
         # Collect Entete
         enteteDiv = div.xpath('./div[contains(@class, \'enteteTexte\')]')
         enteteSoup = BeautifulSoup(enteteDiv.extract_first(), 'html.parser')
-        enteteSoup = self.enrichLinks(enteteSoup)
         self.entete = enteteSoup.get_text()
         # Collect links inside entete
-        # self.enrichLinks(enteteDiv)
+        self.enrichLinks(enteteDiv)
 
         if self.verbose:
             print(self.entete)
@@ -260,23 +246,17 @@ class JOPublicationSpider(scrapy.Spider):
         # Collect remaining text
         articleDiv = div.xpath('./div[2]')
         articleSoup = BeautifulSoup(articleDiv.extract_first(), 'html.parser')
-        articleSoup = self.enrichLinks(articleSoup)
         # Parse all tables inside the main div
         articleSoup, parsedTables = self.parseTables(articleSoup)
-        for p in articleSoup.findAll('p'):
-            p.append('<br/>')
-        for br in articleSoup.find_all('br'):
-            br.replace_with('\n')
         self.article = articleSoup.get_text()
-        # self.article = self.article.replace('<br/>', '\n')
         self.parsedTables = parsedTables
         # Collect links inside entete
-        # self.enrichLinks(articleDiv)
+        self.enrichLinks(articleDiv)
 
         if self.verbose:
             print(self.article)
 
-    def parseArticle(self, summaryText, parentUrl, textNumber, response):
+    def parseArticle(self, parentUrl, textNumber, response):
         """
         Input: article index in publication summary, Scrapy response.
         Output: writes parsed version of the article to a specific JSON file.
@@ -288,6 +268,9 @@ class JOPublicationSpider(scrapy.Spider):
         self.links = []
         dataDiv = response.css('.data')
         mainDiv = None
+
+        nor_search_string = 'NOR\:\s*([A-Z0-9]*)'
+        eli_search_string = 'ELI\:\s(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 
         for div in dataDiv.xpath('./div'):
             hasEntete = len(div.xpath('./div[contains(@class, \'enteteTexte\')]')) == 1
@@ -308,62 +291,36 @@ class JOPublicationSpider(scrapy.Spider):
             textToParse = list(map(textParser.parseText, textToParse))
             [self.entete, self.article] = textToParse
 
-            # Previous expressions:
-            # NOR\:\s*([A-Z0-9]*)\n
-            # ELI\:\s*(.*?)(?=[\s\n\b$])
-            nor = re.search('NOR\:\s*(.*?)(?=[\s\n\b$])', self.entete)
-            nor = nor.groups() if nor else []
-            self.nor = nor[0] if len(nor) > 0 else ''
+            try:
+                nor = re.search(nor_search_string, self.entete).group()
+                eli = re.search(eli_search_string, self.entete).group()
+                self.nor = nor[5:]
+                self.eli = eli[5:]
+            except AttributeError:
+                self.nor = ''
+                self.eli = ''
 
-            eli = re.search('ELI\:\s*(.*?)(?=$|\n|\s\n)', self.entete)
-            eli = eli.groups() if eli else []
-            self.eli = eli[0] if len(eli) > 0 else ''
-
-            cid = re.search('cidTexte\=(.*?)(?=\&)', response.url)
-            cid = cid.groups() if cid else []
-            self.cid = cid[0] if len(cid) > 0 else ''
-
-            # Verify that a few key assumptions are holding;
-            # if not, print a warning message in the logs.
-            assumptions = [
-                [
-                    len(self.nor) != 0,
-                    'Missing NOR'
-                ], [
-                    len(self.eli) != 0,
-                    'Missing ELI'
-                ], [
-                    len(self.cid) != 0,
-                    'Missing cidTexte'
-                ], [
-                    len(self.article) > 15,
-                    'Short Article'
-                ],
-            ]
-
-            for assumption in assumptions:
-                self.handleAssertion(
-                    assumption[0],
-                    self.logFormat.format(
-                        str(self.urls[parentUrl]), textNumber, assumption[1],
-                        response.url
-                    )
-                )
-
-            date = '-'.join(parentUrl.split('/')[-3:])
+            self.handleAssertion(
+                len(self.nor) > 0,
+                self.logFormat.format(str(self.urls[parentUrl]), textNumber, 'Missing NOR', response.url)
+            )
+            self.handleAssertion(
+                len(self.eli) > 0,
+                self.logFormat.format(str(self.urls[parentUrl]), textNumber, 'Missing ELI', response.url)
+            )
+            self.handleAssertion(
+                len(self.article) > 15,
+                self.logFormat.format(str(self.urls[parentUrl]), textNumber, 'Short article', response.url)
+            )
 
             data = {
                 'url': response.url,
                 'entete': self.entete,
                 'NOR': self.nor,
                 'ELI': self.eli,
-                'cid': self.cid,
                 'article': self.article,
                 'links': self.links,
                 'tables': self.parsedTables,
-                'date': date,
-                'summaryUrl': parentUrl,
-                'summaryText': summaryText,
             }
 
             path = 'output/{0}/articles/'.format(str(self.urls[parentUrl]))
@@ -373,4 +330,4 @@ class JOPublicationSpider(scrapy.Spider):
                 os.makedirs(path)
 
             with open(os.path.join(path, filename), 'w+') as outfile:
-                json.dump(data, outfile, ensure_ascii=False)
+                json.dump(data, outfile)

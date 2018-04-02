@@ -56,9 +56,7 @@ def main(argv):
     logFileName = './logs/{0}.txt'.format(str(datetime.now()))
 
     for batch in range(batches):
-        dates = [singleDate for singleDate in ((date.today() - batch * timedelta(daysPerBatch)) - timedelta(day) for day in range(daysPerBatch))]
-        # dates = [singleDate for singleDate in ((date(2018, 1, 23) - batch * timedelta(daysPerBatch)) - timedelta(day) for day in range(daysPerBatch))]
-
+        dates = [singleDate for singleDate in ((date(2017, 12, 5) - batch * timedelta(daysPerBatch)) - timedelta(day) for day in range(daysPerBatch))]
         meta = {
             'urls': {},
             'logFileName': logFileName,
@@ -70,6 +68,7 @@ def main(argv):
         process.crawl(JOPublicationSpider, meta=meta)
 
     process.start()
+
 
 if __name__ == '__main__':
     main(sys.argv)
