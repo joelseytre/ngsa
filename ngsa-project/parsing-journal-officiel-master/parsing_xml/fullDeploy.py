@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
     fileNameRegex = re.compile('.*jorf/simple/JORF/CONT/([0-9]{2}/){5}[a-zA-Z0-9]+/[a-zA-Z0-9]+\.xml')
 
-    for folder in [os.path.join(cwd, 'data', 'JORFSIMPLE'), logsDirPath]:
+    for folder in [os.path.join(cwd, 'data', 'JORFSIMPLE', 'incremental'), logsDirPath]:
         if not os.path.exists(folder):
             os.makedirs(folder)
 
