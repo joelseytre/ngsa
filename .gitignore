@@ -109,13 +109,12 @@ ngsa-project/ngsa-pvenv/*
 *.iml
 *.h
 
-ngsa-project/parsing-journal-officiel-master/parsing_xml/data/*
-ngsa-project/parsing-journal-officiel-master/parsing_xml/logs/
 **/logs.txt
 
-ngsa-project/parsing-journal-officiel-master/scrapping/output/*
-ngsa-project/parsing-journal-officiel-master/scrapping/output_save/*
-ngsa-project/parsing-journal-officiel-master/scrapping/tests/*
-ngsa-project/parsing-journal-officiel-master/scrapping/test.py
-ngsa-project/parsing-journal-officiel-master/scrapping/logs/*
-ngsa-project/parsing-journal-officiel-master/scrapping/spiders/__pycache__/*
+ngsa-project/scrapping/output/*
+ngsa-project/scrapping/logs/*
+ngsa-project/scrapping/spiders/__pycache__/*
+
+ngsa-project/test/output/*
+ngsa-project/test/logs/*
+ngsa-project/test/spiders/__pycache__/*
