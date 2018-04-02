@@ -5,9 +5,9 @@ import lightgbm as lgb
 import numpy as np
 
 class Gradboost(NGSApredictor):
-    def run(self, lmbda):
-        model = lgb.LGBMClassifier(objective='binary', reg_lambda=lmbda, n_estimators=10000)
-        #model = lgb.LGBMClassifier(objective='binary', reg_lambda=10, n_estimators=10000)
+    def run(self):
+        # model = lgb.LGBMClassifier(objective='binary', reg_lambda=lmbda, n_estimators=10000)
+        model = lgb.LGBMClassifier(objective='binary', reg_lambda=10, n_estimators=10000)
         # model = lgb.LGBMClassifier(objective='binary', n_estimators=10000)
 
         # model.fit(self.features['train_data'], self.train_labels)
@@ -42,7 +42,7 @@ class Gradboost(NGSApredictor):
                     early_stopping_rounds=50, verbose=False)
             fscore_t = f1_score(self.train_labels, model.predict(feat_train))
             fscore_v = f1_score(self.valid_labels, model.predict(feat_valid))
-            print "Gradboost Model with removed features: ", feat
+            print("Gradboost Model with removed features: ", feat)
             print("Gradboost model: F1 score - Training %.3f - Validation %.3f" % (fscore_t, fscore_v))
 
 

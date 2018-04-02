@@ -1,6 +1,6 @@
 import csv
 import numpy as np
-import nltk
+# import nltk
 import os
 import random
 import tqdm
@@ -14,10 +14,10 @@ class NGSApredictor:
     def __init__(self, predictor_settings):
         self.settings = predictor_settings.copy()
         # do some nltk stuff (for stopwords, tokenization,...)
-        nltk.download('punkt')  # for tokenization
-        nltk.download('stopwords')
-        self.stpwds = set(nltk.corpus.stopwords.words("english"))
-        self.stemmer = nltk.stem.PorterStemmer()
+        # nltk.download('punkt')  # for tokenization
+        # nltk.download('stopwords')
+        # self.stpwds = set(nltk.corpus.stopwords.words("english"))
+        # self.stemmer = nltk.stem.PorterStemmer()
 
         # read training and test set
         print(os.path.dirname(__file__))
@@ -163,8 +163,8 @@ class NGSApredictor:
 
                 counter += 1
                 if counter % 1000 == 0 and self.settings['print']:
-                    print "\n %i %s examples processed" % (counter, datasets_name[k])
-            print "Done processing %s: %i elements\n\n" % (datasets_name[k], counter)
+                    print("\n %i %s examples processed" % (counter, datasets_name[k]))
+            print("Done processing %s: %i elements\n\n" % (datasets_name[k], counter))
 
             feat = np.array([overlap_title, temp_diff, comm_auth,
                              tfidf_distance_corpus, tfidf_distance_titles, tfidf_distance_authors,
