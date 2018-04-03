@@ -191,21 +191,35 @@ class JOPublicationSpider(scrapy.Spider):
     # and parse them correctly.
 
 
-    def enrichLinks(self, div):
+    def enrichLinks(self, soup):
         """
-        Input: Scrapy <div> tag.
+        Input: SBeatifulSoup soup
         Output: dict with information concerning the input tag.
         """
 
-        links = div.xpath('.//a')
+        k = 0
+        for a in soup.findAll('a'):
+            href = a.get('href')
+            text = a.get_text()
 
-        for a in links:
-            text = a.xpath('./text()').extract_first()
-            href = a.xpath('./@href').extract_first()
-            self.links.append({
-                'text': text,
-                'href': href,
-            })
+            if (href and text != ' '):
+                hashValue = str(hash(str(k) + text))
+
+                cid = []
+                if href:
+                    cid = re.search('cidTexte\=(.*?)(?=\&)', href)
+                    cid = cid.groups() if cid else []
+
+                a.replaceWith('parsedLink#{}'.format(hashValue))
+
+                self.links.append({
+                    'text': text,
+                    'href': href,
+                    'cid': cid[0] if len(cid) > 0 else None,
+                    'hash': hashValue,
+                })
+                k += 1
+        return soup
 
     def parseTables(self, soup):
         """
@@ -236,9 +250,10 @@ class JOPublicationSpider(scrapy.Spider):
         # Collect Entete
         enteteDiv = div.xpath('./div[contains(@class, \'enteteTexte\')]')
         enteteSoup = BeautifulSoup(enteteDiv.extract_first(), 'html.parser')
+        enteteSoup = self.enrichLinks(enteteSoup)
         self.entete = enteteSoup.get_text()
         # Collect links inside entete
-        self.enrichLinks(enteteDiv)
+        # self.enrichLinks(enteteDiv)
 
         if self.verbose:
             print(self.entete)
@@ -246,12 +261,13 @@ class JOPublicationSpider(scrapy.Spider):
         # Collect remaining text
         articleDiv = div.xpath('./div[2]')
         articleSoup = BeautifulSoup(articleDiv.extract_first(), 'html.parser')
+        articleSoup = self.enrichLinks(articleSoup)
         # Parse all tables inside the main div
-        articleSoup, parsedTables = self.parseTables(articleSoup)
+        # articleSoup, parsedTables = self.parseTables(articleSoup)
         self.article = articleSoup.get_text()
-        self.parsedTables = parsedTables
+        # self.parsedTables = parsedTables
         # Collect links inside entete
-        self.enrichLinks(articleDiv)
+        # self.enrichLinks(articleDiv)
 
         if self.verbose:
             print(self.article)
@@ -300,6 +316,10 @@ class JOPublicationSpider(scrapy.Spider):
                 self.nor = ''
                 self.eli = ''
 
+            cid = re.search('cidTexte\=(.*?)(?=\&)', response.url)
+            cid = cid.groups() if cid else []
+            self.cid = cid[0] if len(cid) > 0 else ''
+
             self.handleAssertion(
                 len(self.nor) > 0,
                 self.logFormat.format(str(self.urls[parentUrl]), textNumber, 'Missing NOR', response.url)
@@ -313,14 +333,18 @@ class JOPublicationSpider(scrapy.Spider):
                 self.logFormat.format(str(self.urls[parentUrl]), textNumber, 'Short article', response.url)
             )
 
+            date = '-'.join(parentUrl.split('/')[-3:])
+
             data = {
                 'url': response.url,
                 'entete': self.entete,
                 'NOR': self.nor,
                 'ELI': self.eli,
+                'cid': self.cid,
+                'date': date,
                 'article': self.article,
                 'links': self.links,
-                'tables': self.parsedTables,
+                # 'tables': self.parsedTables,
             }
 
             path = 'output/{0}/articles/'.format(str(self.urls[parentUrl]))
