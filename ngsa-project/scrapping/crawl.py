@@ -51,6 +51,7 @@ def main(argv):
     process = CrawlerProcess(settings)
 
     # Parallelize main spider
+
     batches = 1
     daysPerBatch = 5
     logFileName = './logs/{0}.txt'.format(str(datetime.now()))
