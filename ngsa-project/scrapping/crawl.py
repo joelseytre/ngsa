@@ -52,7 +52,7 @@ def main(argv):
 
     # Parallelize main spider
     batches = 10
-    daysPerBatch = 365
+    daysPerBatch = 5
     logFileName = './logs/{0}.txt'.format(str(datetime.now()))
 
     for batch in range(batches):
