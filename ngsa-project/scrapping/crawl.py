@@ -51,12 +51,13 @@ def main(argv):
     process = CrawlerProcess(settings)
 
     # Parallelize main spider
-    batches = 10
+
+    batches = 1
     daysPerBatch = 5
     logFileName = './logs/{0}.txt'.format(str(datetime.now()))
 
     for batch in range(batches):
-        dates = [singleDate for singleDate in ((date(2017, 12, 5) - batch * timedelta(daysPerBatch)) - timedelta(day) for day in range(daysPerBatch))]
+        dates = [singleDate for singleDate in ((date(2017, 12, 31) - batch * timedelta(daysPerBatch)) - timedelta(day) for day in range(daysPerBatch))]
         meta = {
             'urls': {},
             'logFileName': logFileName,
