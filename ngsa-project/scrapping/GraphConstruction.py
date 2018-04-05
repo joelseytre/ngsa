@@ -128,6 +128,9 @@ class GraphConstruction:
                 res_int.append(self.article_to_num[nodes])
             res.append(res_int)
         return res
+    
+    def conv_nodes_cid(self,list_nodes):
+        return [self.article_to_num[i] for i in list_nodes]
             
 
 
