@@ -106,6 +106,9 @@ class GraphConstruction:
         print('number of nodes: '+str(n_nodes))
         print('number of edges: '+str(n_edges))
         print('number of connected components: '+str(n_cc))
+        tot_triangles=sum(nx.triangles(self.graph).values())/3
+        print('number of triangles: '+str(tot_triangles))
+        plt.hist(nx.triangles(self.graph).values(),bins=1200)
         ccs=sorted(nx.connected_components(self.graph), key = len, reverse=True)
         print('largest and second largest CC size: '+str(len(ccs[0]))+' , '+str(len(ccs[1])))
         plt.figure()

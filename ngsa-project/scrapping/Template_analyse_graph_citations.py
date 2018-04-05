@@ -10,6 +10,7 @@ from calculateTFIDF import TFIDFmanager
 import networkx as nx
 import community
 import numpy as np
+import json
 
 
 gc=GraphConstruction()
@@ -46,5 +47,10 @@ for i in range(n_sub_graph):
     print('les 15 mots les plus représentatifs de la '+str(i+1)+'ème cluster de taille '+str(len(list_cid))+': ')
     dic_word_importance=analyser.tfidf_cc(list_cid)
     print(TFIDFmanager.top_tfidf(dic_word_importance))
+    
+    
+hdn=sorted(gc.graph.nodes(),key=gc.graph.degree)
+print(gc.cid_article[gc.article_to_num[hdn[2]]])
+json.load(open('output/'+gc.cid_article[gc.article_to_num[hdn[2]]]))
 
 
